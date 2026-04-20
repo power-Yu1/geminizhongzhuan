@@ -30,9 +30,7 @@ jobs:
       - name: 🔧 安装依赖
         run: npm ci  # 使用 ci 而不是 install，更快更稳定
 
-      # 构建项目
-      - name: 🏗️ 构建项目
-        run: npm run build
+    
 
       # 部署到 Workers
       - name: 🚀 部署到 Cloudflare
