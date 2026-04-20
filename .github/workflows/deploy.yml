@@ -1,48 +1,21 @@
-name: 自动部署到 Cloudflare Workers 🚀
-
+name: Deploy Worker
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: 构建并部署
-    timeout-minutes: 10
-
     steps:
-      - name: 📥 拉取代码
-        uses: actions/checkout@v4
-
-      - name: 📦 配置 Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          # 如果没有 package-lock.json，去掉 cache 行
-          # cache: 'npm'
-
-      # 重要：只有当存在 package.json 时才安装依赖
-      - name: 🔧 安装依赖
-        run: |
-          if [ -f "package.json" ]; then
-            if [ -f "package-lock.json" ]; then
-              npm ci
-            else
-              npm install
-            fi
-          else
-            echo "没有 package.json，跳过依赖安装"
-          fi
-
-      # 部署到 Workers
-      - name: 🚀 部署到 Cloudflare
+      - name: Install dependencies
+        run: npm ci   # 因为项目有 package-lock.json，用 ci 更快更准
+      - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # 如果 wrangler.toml 不在根目录，用 workingDirectory 指定
-          # workingDirectory: './worker'
+          command: deploy --minify
